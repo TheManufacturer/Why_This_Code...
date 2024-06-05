@@ -12,6 +12,8 @@ public class Mino {
     public int direction = 1; // There are 4 direction (1/2/3/4)
     boolean leftCollision, rightCollision, bottomCollision;
     public boolean active = true;
+    public boolean deactivating;
+    int deactivateCounter = 0;
 
     public void create(Color c){
         b[0] = new Block(c);
@@ -56,8 +58,10 @@ public class Mino {
         rightCollision = false;
         bottomCollision = false;
 
-    //Check frame collision
+        //Check static block collision
+        checkStaticBlockCollision();
 
+    //Check frame collision
     // Left Wall
         for (int i = 0; i < b.length; i++) {
             if (b[i].x == PlayManager.left_x) {
@@ -86,8 +90,10 @@ public class Mino {
         rightCollision = false;
         bottomCollision = false;
 
-        //Check frame collision
+        //Check static block collision
+        checkStaticBlockCollision();
 
+        //Check frame collision
         // Left Wall
         for (int i = 0; i < b.length; i++) {
             if (tempB[i].x < PlayManager.left_x) {
@@ -110,9 +116,39 @@ public class Mino {
         }
     }
 
+    private void checkStaticBlockCollision(){
+        for (int i = 0; i < PlayManager.staticBlock.size(); i++) {
+            int targetX = PlayManager.staticBlock.get(i).x;
+            int targetY = PlayManager.staticBlock.get(i).y;
+
+            //check down
+            for (int ii = 0; ii < b.length; ii++) {
+                if(b[ii].y + Block.SIZE == targetY && b[ii].x == targetX){
+                    bottomCollision = true;
+                }
+            }
+            //check left
+            for (int ii = 0; ii < b.length; ii++) {
+                if(b[ii].x - Block.SIZE == targetX && b[ii].y == targetY){
+                    leftCollision = true;
+                }
+            }
+            //check right
+            for (int ii = 0; ii < b.length; ii++) {
+                if(b[ii].x + Block.SIZE == targetX && b[ii].y == targetY){
+                    rightCollision = true;
+                }
+            }
+        }
+    }
 
 
     public void update(){
+
+        if(deactivating){
+            deactivating();
+        }
+
         // Move the mino
         if (KeyHandler.upPressed){
             switch (direction){
@@ -162,7 +198,7 @@ public class Mino {
         }
 
         if (bottomCollision) {
-            active = false;
+            deactivating = true;
         }
         else{
             autoDropCounter++; // the counter increases in every frame
@@ -176,6 +212,21 @@ public class Mino {
             }
         }
 
+    }
+
+    private void deactivating(){
+        deactivateCounter++;
+
+        //Wait 45Frames until deactivate
+        if(deactivateCounter == 45){
+            deactivateCounter = 0;
+            checkMovementCollision();
+
+            //if the bottom is still hitting after 45 frames, deactivate the mino
+            if (bottomCollision){
+                active = false;
+            }
+        }
     }
 
     public void draw(Graphics2D g2){

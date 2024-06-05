@@ -79,14 +79,63 @@ public class PlayManager{
             staticBlock.add(currentMino.b[2]);
             staticBlock.add(currentMino.b[3]);
 
+            currentMino.deactivating= false;
+
             //Replace the currentMino with the nextMino
             currentMino = nextMino;
             currentMino.setXY(MINO_START_X, MINO_START_Y);
             nextMino = pickMino();
             nextMino.setXY(NEXTMINO_X, NEXTMINO_Y);
+
+            //when a mino becomes inactive, check if line(s) can be deleted
+            checkDelete();
         }else {
             currentMino.update();
         }
+    }
+
+    private void checkDelete(){
+
+        int x = left_x;
+        int y = top_y;
+        int blockCount = 0;
+
+        while(x < right_x && y < bottom_y) {
+
+            for (int i = 0; i < staticBlock.size(); i++) {
+                if (staticBlock.get(i).x == x && staticBlock.get(i).y == y) {
+                    //increase the count if there is a static block
+                    blockCount++;
+                }
+            }
+
+            x += Block.SIZE;
+
+            if (x == right_x) {
+                if (blockCount == 12) {
+
+                    for (int i = staticBlock.size()-1; i > -1; i--) {
+                        //remove all the blocks in the current y line
+                        if (staticBlock.get(i).y == y){
+                            staticBlock.remove(i);
+                        }
+                    }
+
+                    // a line has been deleted so need to slide down blocks that are above it
+                    for (int i = 0; i < staticBlock.size(); i++) {
+                        //if a block is above the current y, move it down by the block size
+                        if (staticBlock.get(i).y < y){
+                            staticBlock.get(i).y += Block.SIZE;
+                        }
+                    }
+                }
+
+                blockCount = 0;
+                x = left_x;
+                y += Block.SIZE;
+            }
+        }
+
     }
 
     public void draw(Graphics2D g2){
