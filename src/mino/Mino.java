@@ -11,6 +11,7 @@ public class Mino {
     int autoDropCounter = 0;
     public int direction = 1; // There are 4 direction (1/2/3/4)
     boolean leftCollision, rightCollision, bottomCollision;
+    public boolean active = true;
 
     public void create(Color c){
         b[0] = new Block(c);
@@ -26,17 +27,21 @@ public class Mino {
     public void setXY(int x, int y){}
 
     public void updateXY(int direction){
-        this.direction = direction;
+        checkRotationCollision();
 
-        // We update the array with tempB because we will look for the rotation and collision...
-        b[0].x = tempB[0].x;
-        b[0].y = tempB[0].y;
-        b[1].x = tempB[1].x;
-        b[1].y = tempB[1].y;
-        b[2].x = tempB[2].x;
-        b[2].y = tempB[2].y;
-        b[3].x = tempB[3].x;
-        b[3].y = tempB[3].y;
+        if(leftCollision == false && rightCollision == false && bottomCollision==false){
+
+            this.direction = direction;
+            // We update the array with tempB because we will look for the rotation and collision...
+            b[0].x = tempB[0].x;
+            b[0].y = tempB[0].y;
+            b[1].x = tempB[1].x;
+            b[1].y = tempB[1].y;
+            b[2].x = tempB[2].x;
+            b[2].y = tempB[2].y;
+            b[3].x = tempB[3].x;
+            b[3].y = tempB[3].y;
+        }
     }
 
     // 4 Method for direction
@@ -73,8 +78,36 @@ public class Mino {
                 bottomCollision = true;
             }
         }
+    }
 
+    public void checkRotationCollision(){
 
+        leftCollision = false;
+        rightCollision = false;
+        bottomCollision = false;
+
+        //Check frame collision
+
+        // Left Wall
+        for (int i = 0; i < b.length; i++) {
+            if (tempB[i].x < PlayManager.left_x) {
+                leftCollision = true;
+            }
+        }
+
+        // Right Wall
+        for (int i = 0; i < b.length; i++) {
+            if (tempB[i].x + Block.SIZE > PlayManager.right_x ) {
+                rightCollision = true;
+            }
+        }
+
+        // Bottom floor
+        for (int i = 0; i < b.length; i++) {
+            if (tempB[i].y + Block.SIZE > PlayManager.bottom_y ) {
+                bottomCollision = true;
+            }
+        }
     }
 
 
@@ -128,17 +161,23 @@ public class Mino {
             KeyHandler.rightPressed = false;
         }
 
-        autoDropCounter++; // the counter increases in every frame
-        if(autoDropCounter == PlayManager.dropInterval){
-            //the mino goes down
-            b[0].y += Block.SIZE;
-            b[1].y += Block.SIZE;
-            b[2].y += Block.SIZE;
-            b[3].y += Block.SIZE;
-            autoDropCounter = 0;
-
+        if (bottomCollision) {
+            active = false;
         }
+        else{
+            autoDropCounter++; // the counter increases in every frame
+            if(autoDropCounter == PlayManager.dropInterval){
+                //the mino goes down
+                b[0].y += Block.SIZE;
+                b[1].y += Block.SIZE;
+                b[2].y += Block.SIZE;
+                b[3].y += Block.SIZE;
+                autoDropCounter = 0;
+            }
+        }
+
     }
+
     public void draw(Graphics2D g2){
 
         int margin = 2;
