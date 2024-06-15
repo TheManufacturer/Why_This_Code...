@@ -29,6 +29,11 @@ public class PlayManager{
     //Others
     public static int dropInterval = 60; //mino drops in every 60 frames
 
+    // Effect
+    boolean effectCounterOn;
+    int effectCounter;
+    ArrayList<Integer> effectY = new ArrayList<>();
+
     public PlayManager(){
 
         //Main Play Area Frame
@@ -114,6 +119,12 @@ public class PlayManager{
             if (x == right_x) {
                 if (blockCount == 12) {
 
+                    effectCounterOn = true;
+                    effectY.add(y);
+
+
+                    //if the blockCount hits 12, that means the current YLine is all filled with Blocks
+                    //so we can delete them
                     for (int i = staticBlock.size()-1; i > -1; i--) {
                         //remove all the blocks in the current y line
                         if (staticBlock.get(i).y == y){
@@ -164,6 +175,23 @@ public class PlayManager{
         //Draw Static Blocks
         for(int i = 0; i < staticBlock.size(); i++) {
             staticBlock.get(i).draw(g2);
+        }
+
+        // Draw Effect
+        if(effectCounterOn){
+            effectCounter++;
+
+            g2.setColor(Color.red);
+            for(int i = 0; i < effectY.size(); i++) {
+                g2.fillRect(left_x, effectY.get(i), WIDTH, Block.SIZE);
+            }
+
+            if (effectCounter == 10) {
+                effectCounterOn = false;
+                effectCounter = 0;
+                effectY.clear();
+            }
+
         }
 
         //Draw Pause
