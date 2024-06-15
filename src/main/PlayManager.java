@@ -35,6 +35,11 @@ public class PlayManager{
     int effectCounter;
     ArrayList<Integer> effectY = new ArrayList<>();
 
+    // Score
+    int level = 1;
+    int lines;
+    int score;
+
     public PlayManager(){
 
         //Main Play Area Frame
@@ -91,6 +96,8 @@ public class PlayManager{
                 // this means the currentMino immediately collided  a block and couldn't move at all
                 // so it's xy are the same with the nexMino's
                 gameOver = true;
+                GamePanel.music.stop();
+                GamePanel.se.play(2,false);
             }
 
             currentMino.deactivating= false;
@@ -113,6 +120,7 @@ public class PlayManager{
         int x = left_x;
         int y = top_y;
         int blockCount = 0;
+        int lineCount = 0;
 
         while(x < right_x && y < bottom_y) {
 
@@ -140,6 +148,24 @@ public class PlayManager{
                             staticBlock.remove(i);
                         }
                     }
+                    lineCount++;
+                    lines++;
+                    // Drop speed
+                    // if the line score hits a certain number, increase the drp speed
+                    // 1 is the fastest
+                    if (lines % 10 == 0 && dropInterval >1) {
+                        //every 10 lines, level increase
+                        level++;
+
+                        //Score Mechanics
+                        if (dropInterval > 10){
+                            dropInterval -= 10;
+                        }else{
+                            dropInterval -= 1;
+                        }
+                    }
+
+
 
                     // a line has been deleted so need to slide down blocks that are above it
                     for (int i = 0; i < staticBlock.size(); i++) {
@@ -154,6 +180,13 @@ public class PlayManager{
                 x = left_x;
                 y += Block.SIZE;
             }
+        }
+
+        // Add Score
+        if (lineCount > 0) {
+            GamePanel.se.play(1,false);
+            int singleLineScore = 10 * level;
+            score += singleLineScore * lineCount;
         }
 
     }
@@ -172,6 +205,15 @@ public class PlayManager{
         g2.setFont(new Font("Arial",Font.PLAIN,30));
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         g2.drawString("NEXT", x+60,y+60);
+
+        // Draw Score Frame
+        g2.drawRect(x,top_y,250,300);
+        x += 40;
+        y = top_y + 90;
+        g2.drawString("LEVEL: "+ level ,x,y); y+=70;
+        g2.drawString("LINES: "+ lines ,x,y); y+=70;
+        g2.drawString("SCORE:"+ score, x, y);
+
 
         //Draw the currentMino
         if (currentMino != null){
