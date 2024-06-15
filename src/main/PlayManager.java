@@ -28,6 +28,7 @@ public class PlayManager{
 
     //Others
     public static int dropInterval = 60; //mino drops in every 60 frames
+    boolean gameOver;
 
     // Effect
     boolean effectCounterOn;
@@ -83,6 +84,14 @@ public class PlayManager{
             staticBlock.add(currentMino.b[1]);
             staticBlock.add(currentMino.b[2]);
             staticBlock.add(currentMino.b[3]);
+
+            //check if the game is over
+            if (currentMino.b[0].x == MINO_START_X && currentMino.b[0].y == MINO_START_Y){
+
+                // this means the currentMino immediately collided  a block and couldn't move at all
+                // so it's xy are the same with the nexMino's
+                gameOver = true;
+            }
 
             currentMino.deactivating= false;
 
@@ -194,15 +203,29 @@ public class PlayManager{
 
         }
 
-        //Draw Pause
+        //Draw Pause/Game Over
         g2.setColor(Color.yellow);
         g2.setFont(g2.getFont().deriveFont(50f));
+        if (gameOver) {
+            x= left_x + 25;
+            y= top_y + 320;
+            g2.drawString("GAME OVER, Loser ;)",  x, y);
+        }
         if (KeyHandler.pausePressed){
             x= left_x + 70;
             y= top_y + 320;
             g2.drawString("PAUSED",  x, y);
         }
+
+        // Draw Game Title
+        x = 35;
+        y = top_y + 320;
+        g2.setColor(Color.white);
+        g2.setFont(new Font("Times New Roman", Font.ITALIC, 55));
+        g2.drawString("Simple Tetris", x+20, y);
+
+        // g2.setFont(new Font("Times New Roman", Font.BOLD, 55));
+        //g2.drawString("Useless MF", x+20, y+75);
+
     }
-
-
 }
